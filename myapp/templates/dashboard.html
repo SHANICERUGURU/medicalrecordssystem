@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <!-- if the user is already authenticated -->
+  {% if user.is_authenticated %}
+    
+    <h2 class="mb-4 text-primary">
+  {% if patient %}
+    {{ patient.first_name }} {{ patient.last_name }}'s Dashboard
+  {% else %}
+    {{ user.display_patient_name }}'s Dashboard
+  {% endif %}
+</h2>
+
+    {% if patient %}
+      <!-- Patient Records Section -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">{{ patient.first_name }}'s Medical Records</h5>
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            {% for record in records %}
+                <li class="list-group-item">
+                    <strong>Date:</strong> {{ record.date }}<br>
+                    <strong>Diagnosis:</strong> {{ record.diagnosis }}<br>
+                    <strong>Doctor:</strong> {{ record.doctor }}<br>
+                    {% if record.notes %}<strong>Notes:</strong> {{ record.notes }}{% endif %}
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted">No medical records yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Patient Appointments Section -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">{{ patient.first_name }}'s Appointments</h5>
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            {% for appointment in appointments %}
+                <li class="list-group-item">
+                    <strong>Date & Time:</strong> {{ appointment.date_time }}<br>
+                    <strong>Doctor:</strong> {{ appointment.doctor }}<br>
+                    <strong>Reason:</strong> {{ appointment.reason }}<br>
+                    <strong>Status:</strong> {{ appointment.get_status_display }}
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted">No appointments yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+      <!-- Edit Profile Button -->
+      <a href="{% url 'my_profile_edit' %}" class="btn btn-primary">Edit My Details</a>
+
+    {% else %}
+      <div class="alert alert-warning">
+        <p>Welcome! Let's complete your profile so we can personalize your dashboard.</p>
+        <a href="{% url 'profile_setup' %}" class="btn btn-outline-info">Set Up My Profile</a>
+      </div>
+    {% endif %}
+
+  {% else %}
+    <!-- login if user not logged in -->
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow-lg">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Login to Access Your Dashboard</h5>
+          </div>
+          <div class="card-body">
+            <form method="POST" action="{% url 'login' %}">
+              {% csrf_token %}
+              {{ form.as_p }}
+              <button type="submit" class="btn btn-success w-100">Login</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+<nav>
+    {% if user.is_authenticated %}
+      <span>Hi {{ user.display_name }}</span> |
+      <a href="{% url 'dashboard' %}">Home</a>
+      {% if user.is_patient %}
+        | <a href="{% url 'my_profile_edit' %}">My Profile</a>
+      {% endif %}
+      | <a href="{% url 'logout' %}">Logout</a>
+    {% else %}
+      <a href="{% url 'login' %}">Login</a>
+    {% endif %}
+  </nav>
