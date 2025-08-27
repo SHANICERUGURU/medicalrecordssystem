@@ -57,7 +57,7 @@
 </div>
 
       <!-- Edit Profile Button -->
-      <a href="{% url 'my_profile_edit' %}" class="btn btn-primary">Edit My Details</a>
+      <a href="{% url 'my_profile_edit' request.user.id %}" class="btn btn-primary">Edit My Details</a>
 
     {% else %}
       <div class="alert alert-warning">

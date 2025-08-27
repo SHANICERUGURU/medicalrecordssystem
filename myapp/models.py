@@ -99,3 +99,7 @@ class Appointment(models.Model):
 
     def __str__(self):  # Add this method
         return f"Appointment with Dr. {self.doctor} on {self.date_time}"
+    
+
+
+    
