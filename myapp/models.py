@@ -36,7 +36,7 @@ class Patient(models.Model):
     
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(null=True)
     
     class Gender(models.TextChoices):  # Using Django choices class pattern
         MALE = 'M', 'Male'
@@ -51,7 +51,7 @@ class Patient(models.Model):
     last_appointment = models.DateField(null=True, blank=True)
     last_doctor = models.CharField(max_length=100, blank=True)
     emergency_contact_name = models.CharField(max_length=100)
-    emergency_contact_phone = models.CharField(max_length=15, blank=True)
+    emergency_contact_phone = models.CharField(max_length=15)
     
     # Add these fields for better data management
     created_at = models.DateTimeField(auto_now_add=True)

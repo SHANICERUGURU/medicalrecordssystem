@@ -15,6 +15,16 @@
           </h4>
         </div>
         <div class="card-body">
+          {% if form.errors %}
+            <div class="alert alert-danger">
+              <ul class="mb-0">
+                {% for field, errors in form.errors.items %}
+                  <li><strong>{{ field|capfirst }}:</strong> {{ errors|join:", " }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          
           <form method="post">
             {% csrf_token %}
             <div class="mb-3">
@@ -34,9 +44,3 @@
   </div>
 </div>
 {% endblock %}
-
-{% if form.errors %}
-  <div class="alert alert-danger">
-    {{ form.errors }}
-  </div>
-{% endif %}
