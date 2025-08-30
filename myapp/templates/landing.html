@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Welcome to the Medical Records System</h1>
+        <p class="lead">Your health, our priority.</p>
+        <hr class="my-4">
+        <p>Manage your medical records and appointments with ease.</p>
+        <a class="btn btn-primary btn-lg" href="{% url 'register' %}" role="button">Get Started</a>
+        <a class="btn btn-link mt-3" href="{% url 'login' %}">Already have an account? Log in here.</a>
+    </div>
+    <div class="row mt-5">
+        <div class="col-md-4 text-center">
+            <img src="{% static 'images/records.png' %}" alt="Medical Records" class="img-fluid mb-3">
+            <h3>Secure Records</h3>
+            <p>Your medical records are stored securely and can be accessed anytime.</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <img src="{% static 'images/appointments.png' %}" alt="Appointments" class="img-fluid mb-3">
+            <h3>Easy Appointments</h3>
+            <p>Schedule and manage your appointments with healthcare providers effortlessly.</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <img src="{% static 'images/support.png' %}" alt="Support" class="img-fluid mb-3">
+            <h3>24/7 Support</h3>
+            <p>Our support team is here to help you with any questions or issues.</p>
+        </div>
+    </div>
+
+</div>

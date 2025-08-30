@@ -10,6 +10,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .serializer import *
 
+def landingPage(request):
+    return render (request, 'landing.html')
+
 def RegistrationView(request):
 
     if request.method == 'POST':
