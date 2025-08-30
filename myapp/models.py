@@ -35,8 +35,9 @@ class User(AbstractUser):
         FEMALE = 'F', 'Female'
         OTHER = 'O', 'Other'
     
-    gender = models.CharField(max_length=1, choices=Gender.choices)  # Fixed reference
-    phone = models.CharField(max_length=15)
+    gender = models.CharField(max_length=1, choices=Gender.choices, default='F')  # Fixed reference
+    phone = models.CharField(max_length=15, default='0000000000')
+    email = models.EmailField(unique=True)
    
 class Patient(models.Model):
     # One-to-one relationship with the User model (one profile = one user)
@@ -49,7 +50,7 @@ class Patient(models.Model):
     
     blood_type = models.CharField(max_length=3)
     allergies = models.TextField(blank=True)
-    chronic_conditions = models.TextField(blank=True, null=True)
+    chronic_illness = models.TextField(blank=True, null=True)
     last_appointment = models.DateField(null=True, blank=True)
     last_doctor = models.CharField(max_length=100, blank=True)
     emergency_contact_name = models.CharField(max_length=100)
