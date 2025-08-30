@@ -1,6 +1,6 @@
 from django import forms
 from .models import *
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 class PatientForm(forms.ModelForm):
@@ -24,3 +24,13 @@ class RegisterForm(UserCreationForm):
         super(RegisterForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+
+class MedicalRecordForm(forms.ModelForm):
+    class Meta:
+        model = MedicalRecord
+        fields = ['diagnosis', 'treatment', 'date', 'doctor', 'notes']
+        
+    def __init__(self, *args, **kwargs):
+        super(MedicalRecordForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'           

@@ -161,6 +161,38 @@ def medical_record_detail(request, pk):
         record.delete()
         return Response(status=204)
     
+@login_required
+def medical_record_view(request, patient_id):
+    try:
+        patient = Patient.objects.get(pk=patient_id)
+    except Patient.DoesNotExist:
+        messages.error(request, "Patient not found.")
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = MedicalRecordForm(request.POST)
+        if form.is_valid():
+            record = form.save(commit=False)
+            record.patient = patient  # link record to this patient
+            record.save()
+            messages.success(request, "Medical record added successfully.")
+            return redirect('medical_record_view', patient_id=patient.id)
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = MedicalRecordForm()
+
+    # Show all patient records alongside the form
+    records = MedicalRecord.objects.filter(patient=patient)
+
+    return render(request, 'medicalrecords.html', {
+        'form': form,
+        'patient': patient,
+        'records': records
+    })
+   
+
+    
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
 def user_profile(request):
