@@ -62,24 +62,83 @@ def patient(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['GET', 'PUT', 'DELETE'])
-@login_required
 @permission_classes([IsAuthenticated])
 def patient_detail(request, pk):
-    if request.user.is_doctor():
-        profile = Patient.objects.get(pk=pk)  # doctor can edit any patient
-    else:
-        profile = request.user.patient_profile  # patient can only edit their own
-
-    if request.method == 'GET':
-        serializer = Patientserializer(profile)
-        return Response(serializer.data)
+    try:
+        # Get the patient object with proper permission checks
+        if request.user.is_doctor():
+            # Doctors can access any patient
+            patient = Patient.objects.get(pk=pk)
+        else:
+            # Patients can only access their own profile
+            try:
+                patient_profile = request.user.patient_profile
+                if patient_profile.id != int(pk):
+                    return Response(
+                        {'error': 'Access denied. You can only access your own profile.'}, 
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+                patient = Patient.objects.get(pk=pk, user=request.user)
+            except AttributeError:
+                return Response(
+                    {'error': 'Patient profile not found'}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
     
+    except Patient.DoesNotExist:
+        return Response(
+            {'error': 'Patient not found'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except ValueError:
+        return Response(
+            {'error': 'Invalid patient ID'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Handle different HTTP methods
+    if request.method == 'GET':
+        serializer = Patientserializer(patient)
+        return Response(serializer.data)
+
     elif request.method == 'PUT':
-        serializer = Patientserializer(profile, data=request.data)
+        # For patients, ensure they can only update their own profile
+        if not request.user.is_doctor() and patient.user != request.user:
+            return Response(
+                {'error': 'You can only update your own profile'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = Patientserializer(patient, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        # Only allow doctors to delete patients
+        if not request.user.is_doctor():
+            return Response(
+                {'error': 'Only doctors can delete patient profiles'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        patient.delete()
+        return Response(
+            {'message': 'Patient profile deleted successfully'}, 
+            status=status.HTTP_204_NO_CONTENT
+        )
+    
+def patient_list(request):
+    if not request.user.is_doctor():
+        messages.error(request, '❌ Access denied. Doctor privileges required to view patient lists.')
+        return redirect('dashboard')
+    
+    patients = Patient.objects.all().select_related('user').prefetch_related('medical_records')
+    return render(request, 'patient_list.html', {
+        'patients': patients,
+        'total_patients': patients.count()
+    }) 
 
 @api_view(['GET'])
 def medical_records(request):
@@ -261,16 +320,39 @@ def profile_setup(request):
     return render(request, 'my_profile_form.html', {'form': form, 'mode': 'setup'})
 
 @login_required
-def my_profile_edit(request,pk):
-    if not hasattr(request.user, 'is_patient') or not request.user.is_patient():
-        messages.error(request, 'Only patients can access the profile setup.')
+def doctor_edit_patient(request, pk):
+    if not request.user.is_doctor():
+        messages.error(request, 'Only doctors can edit patient profiles.')
         return redirect('dashboard')
-
+    
     try:
-        # Try to get existing profile
-        profile = Patient.objects.get(pk=pk)
+        patient = Patient.objects.get(pk=pk)
     except Patient.DoesNotExist:
-        # If profile doesn't exist, redirect to setup instead of creating incomplete one
+        messages.error(request, 'Patient not found.')
+        return redirect('patient_list')
+    
+    if request.method == 'POST':
+        form = PatientForm(request.POST, instance=patient)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Patient profile updated successfully.')
+            return redirect('patient_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PatientForm(instance=patient)
+    
+    return render(request, 'doctor_edit_patient.html', {'form': form, 'patient': patient})
+
+@login_required
+def my_profile_edit(request):
+    if not hasattr(request.user, 'is_patient') or not request.user.is_patient():
+        messages.error(request, 'Only patients can edit their profile.')
+        return redirect('dashboard')
+    
+    try:
+        profile = request.user.patient_profile
+    except AttributeError:
         messages.info(request, 'Please complete your profile setup first.')
         return redirect('profile_setup')
 
@@ -281,11 +363,8 @@ def my_profile_edit(request,pk):
             messages.success(request, 'Profile updated successfully.')
             return redirect('dashboard')
         else:
-            # Add debug output to see validation errors
-            print("Form errors:", form.errors)
             messages.error(request, 'Please correct the errors below.')
     else:
         form = PatientForm(instance=profile)
 
     return render(request, 'my_profile_form.html', {'form': form, 'mode': 'edit'})
-

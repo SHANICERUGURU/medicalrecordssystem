@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Edit Patient: {{ patient.get_full_name }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Update Patient</button>
+</form>
+
+<h3>Medical Records</h3>
+<ul>
+    {% for record in medical_records %}
+    <li>{{ record.diagnosis }} - {{ record.date_recorded }}</li>
+    {% empty %}
+    <li>No medical records found.</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'patient_list' %}">Back to Patient List</a>
+{% endblock %}
