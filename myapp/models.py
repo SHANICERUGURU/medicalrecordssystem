@@ -47,7 +47,7 @@ class Patient(models.Model):
     phone = models.CharField(max_length=15)
     blood_type = models.CharField(max_length=3)
     allergies = models.TextField(blank=True)
-    medical_history = models.TextField(blank=True)
+    medical_history = models.TextField(blank=True, null=True)
     last_appointment = models.DateField(null=True, blank=True)
     last_doctor = models.CharField(max_length=100, blank=True)
     emergency_contact_name = models.CharField(max_length=100)

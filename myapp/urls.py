@@ -12,4 +12,8 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('api/patients/', views.patient , name='patient'),
     path('api/patients/<int:pk>/', views.patient_detail , name='patient_detail'),
+    path('api/user/profile/', views.UserProfile , name='user_profile'),
+    path('api/medical_records/', views.medical_records , name='medical_records'),
+    path('api/medical_records/<int:pk>/', views.medical_record_detail , name='medical_record_detail'),
+    path('api/appointments/', views.appointments , name='appointments'),
 ]

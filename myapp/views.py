@@ -5,8 +5,9 @@ from .models import *
 from .forms import *
 from django.contrib import messages
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from .serializer import *
 
 def RegistrationView(request):
@@ -65,16 +66,23 @@ def patient_detail(request, pk):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = Patientserializer(patient, data=request.data)
+        serializer = Patientserializer(patient, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         patient.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)    
-    
+@api_view(['GET'])
+def UserProfile(request):
+    try:
+        user = request.user
+        serializer = Userserializer(user)
+        return Response(serializer.data)
+    except AttributeError:
+        return Response({'error': 'User not found'}, status=403)    
 
 @api_view(['GET'])
 def medical_records(request):
