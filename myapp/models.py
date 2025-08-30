@@ -25,14 +25,6 @@ class User(AbstractUser):
     
     def __str__(self):
         return f"{self.username} ({self.role})"  # Added __str__ method for better representation
-   
-class Patient(models.Model):
-    # One-to-one relationship with the User model (one profile = one user)
-    user = models.OneToOneField(      
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE,
-        related_name='patient_profile'
-    )   
     
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -45,13 +37,26 @@ class Patient(models.Model):
     
     gender = models.CharField(max_length=1, choices=Gender.choices)  # Fixed reference
     phone = models.CharField(max_length=15)
+   
+class Patient(models.Model):
+    # One-to-one relationship with the User model (one profile = one user)
+    user = models.OneToOneField(      
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE,
+        related_name='patient_profile'
+    )   
+    
+    
     blood_type = models.CharField(max_length=3)
     allergies = models.TextField(blank=True)
-    medical_history = models.TextField(blank=True, null=True)
+    chronic_conditions = models.TextField(blank=True, null=True)
     last_appointment = models.DateField(null=True, blank=True)
     last_doctor = models.CharField(max_length=100, blank=True)
     emergency_contact_name = models.CharField(max_length=100)
     emergency_contact_phone = models.CharField(max_length=15)
+    insurance_type = models.CharField(max_length=100, blank=True)
+    current_medications = models.TextField(blank=True)  
+    family_medical_history = models.TextField(blank=True)
     
     # Add these fields for better data management
     created_at = models.DateTimeField(auto_now_add=True)
