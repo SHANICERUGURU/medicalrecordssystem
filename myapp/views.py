@@ -41,6 +41,7 @@ def login_view(request):
     return render(request, 'login.html')
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def patient(request):
     if request.method == 'GET':
         patients = Patient.objects.all()
@@ -48,53 +49,47 @@ def patient(request):
         return Response(serializer.data)
 
     elif request.method == 'POST':
+        medical_records_data = request.data.pop('medical_records', [])
         serializer = Patientserializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            patient = serializer.save(user=request.user)
+            for record_data in medical_records_data:
+                MedicalRecord.objects.create(patient=patient, **record_data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['GET', 'PUT', 'DELETE'])
+@login_required
+@permission_classes([IsAuthenticated])
 def patient_detail(request, pk):
-    try:
-        patient = Patient.objects.get(pk=pk)
-    except Patient.DoesNotExist:
-        return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
+    if request.user.is_doctor():
+        profile = Patient.objects.get(pk=pk)  # doctor can edit any patient
+    else:
+        profile = request.user.patient_profile  # patient can only edit their own
 
     if request.method == 'GET':
-        serializer = Patientserializer(patient)
+        serializer = Patientserializer(profile)
         return Response(serializer.data)
-
+    
     elif request.method == 'PUT':
-        serializer = Patientserializer(patient, data=request.data, partial=True)
+        serializer = Patientserializer(profile, data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        patient.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)    
-@api_view(['GET'])
-def UserProfile(request):
-    try:
-        user = request.user
-        serializer = Userserializer(user)
-        return Response(serializer.data)
-    except AttributeError:
-        return Response({'error': 'User not found'}, status=403)    
+        return Response(serializer.errors, status=400)
 
 @api_view(['GET'])
 def medical_records(request):
     try:
         patient = request.user.patient_profile
-        records = MedicalRecord.objects.filter(patient=patient)
-        serializer = MedicalRecordserializer(records, many=True)
-        return Response(serializer.data)
     except AttributeError:
         return Response({'error': 'Patient profile not found'}, status=403)
+    records = MedicalRecord.objects.filter(patient=patient)
+    serializer = MedicalRecordserializer(records, many=True)
+    return Response(serializer.data)
     
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def appointments(request):
     if request.method == 'GET':
         try:
@@ -106,9 +101,81 @@ def appointments(request):
             return Response({'error': 'Patient profile not found'}, status=403)
     
     elif request.method == 'POST':
-        # Handle appointment creation
-        pass    
+        try:
+            patient = request.user.patient_profile
+            serializer = Appointmentserializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(patient=patient)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except AttributeError:
+            return Response({'error': 'Patient profile not found'}, status=403)
+  
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def medical_records_list(request):
+    if request.method == 'GET':
+        try:
+            patient = request.user.patient_profile
+            records = MedicalRecord.objects.filter(patient=patient)
+            serializer = MedicalRecordserializer(records, many=True)
+            return Response(serializer.data)
+        except AttributeError:
+            return Response({'error': 'Patient profile not found'}, status=403)
+    
+    elif request.method == 'POST':
+        try:
+            patient = request.user.patient_profile
+            serializer = MedicalRecordserializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(patient=patient)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except AttributeError:
+            return Response({'error': 'Patient profile not found'}, status=403)
 
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def medical_record_detail(request, pk):
+    try:
+       if request.user.is_doctor():
+           record = MedicalRecord.objects.get(pk=pk)
+       else:
+              patient = request.user.patient_profile
+              record = MedicalRecord.objects.get(pk=pk, patient=patient) 
+    except MedicalRecord.DoesNotExist:
+        return Response({'error': 'Medical record not found'}, status=404)
+    
+    if request.method == 'GET':
+        serializer = MedicalRecordserializer(record)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = MedicalRecordserializer(record, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+    
+    elif request.method == 'DELETE':
+        record.delete()
+        return Response(status=204)
+    
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    user = request.user
+    
+    if request.method == 'GET':
+        serializer = Userserializer(user)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = Userserializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)   
 
 @login_required
 def dashboard(request):
@@ -134,8 +201,6 @@ def dashboard(request):
 
 @login_required
 def profile_setup(request):
-    # You'll need to implement is_patient() method in your User model
-    # or replace this with appropriate logic
     if not hasattr(request.user, 'is_patient') or not request.user.is_patient():
         messages.error(request, 'Only patients can access the profile setup.')
         return redirect('dashboard')
