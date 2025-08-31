@@ -30,10 +30,10 @@
     {% endif %}
   </div>
   <div class="mb-3">
-    <label for="{{ form.chronic_conditions.id_for_label }}" class="form-label">Chronic Conditions</label>
-    {{ form.chronic_conditions }}
-    {% if form.chronic_conditions.errors %}
-    <div class="text-danger">{{ form.chronic_conditions.errors }}</div>
+    <label for="{{ form.illness.id_for_label }}" class="form-label">Chronic Conditions</label>
+    {{ form.chronic_illness }}
+    {% if form.chronic_illness.errors %}
+    <div class="text-danger">{{ form.chronic_illness.errors }}</div>
     {% endif %}
   </div>
   <div class="mb-3">

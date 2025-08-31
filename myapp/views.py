@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 from .models import *
 from .forms import *
 from django.contrib import messages
@@ -32,16 +33,15 @@ def RegistrationView(request):
 
 
 def login_view(request):
+    form= AuthenticationForm(request, data=request.POST or None)
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
+        if form.is_valid():
+            user = form.get_user()
             login(request, user)
             return redirect('dashboard')
         else:
             messages.error(request, 'Invalid username or password.')
-    return render(request, 'login.html')
+    return render(request, 'login.html', {'form': form})
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])

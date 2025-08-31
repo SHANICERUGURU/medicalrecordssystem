@@ -26,8 +26,10 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.role})"  # Added __str__ method for better representation
     
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    # first_name = models.CharField(max_length=100)
+    # last_name = models.CharField(max_length=100)
+    # username=models.CharField(max_length=100)
+    # email = models.EmailField(unique=True)
     date_of_birth = models.DateField(null=True)
     
     class Gender(models.TextChoices):  # Using Django choices class pattern
@@ -37,7 +39,7 @@ class User(AbstractUser):
     
     gender = models.CharField(max_length=1, choices=Gender.choices, default='F')  # Fixed reference
     phone = models.CharField(max_length=15, default='0000000000')
-    email = models.EmailField(unique=True)
+
    
 class Patient(models.Model):
     # One-to-one relationship with the User model (one profile = one user)

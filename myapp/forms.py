@@ -17,14 +17,16 @@ User = get_user_model()
 class RegisterForm(UserCreationForm):
     class Meta:
         model=User
-        fields=['first_name', 'last_name','email','phone', 'gender', 'date_of_birth','role' ,'password1','password2'] 
+        fields=['first_name', 'last_name','username','email','phone', 'gender', 'date_of_birth','role' ,'password1','password2'] 
 
         #    adding styling to the form created
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
-
+     
+    
+        
 class MedicalRecordForm(forms.ModelForm):
     class Meta:
         model = MedicalRecord
