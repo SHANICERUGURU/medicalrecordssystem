@@ -16,24 +16,22 @@
     {% if patient %}
       <!-- Patient Records Section -->
 <div class="card shadow-sm mb-4">
-    <div class="card-header bg-info text-white">
-        <h5 class="mb-0">{{ user.first_name }}'s Medical Records</h5>
-    </div>
-    <div class="card-body">
-        <ul class="list-group">
-            {% for record in records %}
-                <li class="list-group-item">
-                    <strong>Date:</strong> {{ record.date }}<br>
-                    <strong>Diagnosis:</strong> {{ record.diagnosis }}<br>
-                    <strong>Doctor:</strong> {{ record.doctor }}<br>
-                    {% if record.notes %}<strong>Notes:</strong> {{ record.notes }}{% endif %}
-                </li>
-            {% empty %}
-                <li class="list-group-item text-muted">No medical records yet.</li>
-            {% endfor %}
-        </ul>
-    </div>
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">Health Profile</h5>
+  </div>
+  <div class="card-body">
+    <p><strong>Blood Type:</strong> {{ patient.blood_type|default:"Not provided" }}</p>
+    <p><strong>Allergies:</strong> {{ patient.allergies|default:"None reported" }}</p>
+    <p><strong>Chronic Illness:</strong> {{ patient.chronic_illness|default:"None reported" }}</p>
+    <p><strong>Last Appointment:</strong> {{ patient.last_appointment|date:"M d, Y"|default:"No record" }}</p>
+    <p><strong>Last Doctor:</strong> {{ patient.last_doctor|default:"Not specified" }}</p>
+    <p><strong>Emergency Contact:</strong> {{ patient.emergency_contact_name }} ({{ patient.emergency_contact_phone }})</p>
+    <p><strong>Insurance Type:</strong> {{ patient.insurance_type|default:"Not provided" }}</p>
+    <p><strong>Current Medications:</strong> {{ patient.current_medications|default:"None" }}</p>
+    <p><strong>Family Medical History:</strong> {{ patient.family_medical_history|default:"Not provided" }}</p>
+  </div>
 </div>
+
 
 <!-- Patient Appointments Section -->
 <div class="card shadow-sm mb-4">
