@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2 class="mb-4">Welcome, {{ patient.user.username }}!</h2>
+
+  {% if appointments %}
+    <h4>Your Appointments:</h4>
+    <ul class="list-group mb-4">
+      {% for appointment in appointments %}
+        <li class="list-group-item">
+          <strong>Date & Time:</strong> {{ appointment.date_time }} <br>
+          <strong>Doctor:</strong> {{ appointment.doctor }} <br>
+          <strong>Reason:</strong> {{ appointment.reason }} <br>
+          <strong>Status:</strong> {{ appointment.status }}
+        </li>
+      {% endfor %}
+    </ul>
+
+    <h4>Book a new appointment</h4>
+  {% else %}
+    <div class="alert alert-info">
+      You don't have any appointments yet. Book one below 👇
+    </div>
+  {% endif %}
+
+  <!-- Your form (copied from appointmentform.html) -->
+  <form method="post">
+    {% csrf_token %}
+
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        Please correct the errors below.
+      </div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label for="{{ form.date_time.id_for_label }}" class="form-label">Enter date and time</label>
+      {{ form.date_time }}
+      {% if form.date_time.errors %}
+        <div class="text-danger">{{ form.date_time.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.doctor.id_for_label }}" class="form-label">Enter doctor's name</label>
+      {{ form.doctor }}
+      {% if form.doctor.errors %}
+        <div class="text-danger">{{ form.doctor.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.reason.id_for_label }}" class="form-label">Reason</label>
+      {{ form.reason }}
+      {% if form.reason.errors %}
+        <div class="text-danger">{{ form.reason.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+      {{ form.status }}
+      {% if form.status.errors %}
+        <div class="text-danger">{{ form.status.errors }}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Book</button>
+  </form>
+{% endblock %}

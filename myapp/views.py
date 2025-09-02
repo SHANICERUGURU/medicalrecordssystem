@@ -182,6 +182,39 @@ def appointments(request):
             return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
         except AttributeError:
             return Response({'error': 'Patient profile not found'}, status=403)
+        
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .models import Appointment
+from .forms import AppointmentForm
+
+@login_required
+def appointment_page(request):
+    try:
+        patient = request.user.patient_profile
+    except AttributeError:
+        messages.error(request, "You must complete your patient profile first.")
+        return redirect("profile_setup")
+
+    appointments = Appointment.objects.filter(patient=patient)
+
+    if request.method == "POST":
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            appointment = form.save(commit=False)
+            appointment.patient = patient
+            appointment.save()
+            messages.success(request, "Appointment booked successfully!")
+            return redirect("appointment_page")
+    else:
+        form = AppointmentForm()
+
+    return render(request, "appointments.html", {
+        "appointments": appointments,
+        "form": form,
+        "patient": patient,
+    })
+
   
 @api_view(['GET', 'POST'])
 def medical_records_list(request):

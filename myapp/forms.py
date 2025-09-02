@@ -35,4 +35,14 @@ class MedicalRecordForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(MedicalRecordForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs['class'] = 'form-control'           
+            self.fields[field].widget.attrs['class'] = 'form-control'    
+
+class AppointmentForm(forms.ModelForm):
+    class Meta :
+        model = Appointment  
+        fields =['date_time', 'doctor', 'reason','status']       
+
+def __init__(self, *args, **kwargs):
+        super(AppointmentForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'

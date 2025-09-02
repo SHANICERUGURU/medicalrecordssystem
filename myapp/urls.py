@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.landingPage, name='landing'),
     path('register/', views.RegistrationView, name='register'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('appointments/', views.appointment_page,name='appointments'),
     
     # Profile URLs
     path('profile/setup/', views.profile_setup, name='profile_setup'),
