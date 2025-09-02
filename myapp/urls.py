@@ -9,7 +9,7 @@ urlpatterns = [
     
     # Profile URLs
     path('profile/setup/', views.profile_setup, name='profile_setup'),
-    path('profile/edit/', views.my_profile_edit, name='my_profile_edit'), 
+    path('profile/edit/<int:pk>/', views.my_profile_edit, name='my_profile_edit'), 
     
     # Patient management URLs (for doctors)
     path('patients/', views.patient_list, name='patient_list'),  
@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/patients/', views.patient, name='patient_api'),
     path('api/patients/<int:pk>/', views.patient_detail, name='patient_detail_api'),
     path('api/user/profile/', views.user_profile, name='user_profile_api'),
+    path('api/users/',views.UserPost, name= 'user-post'),
     path('api/medical-records/', views.medical_records_list, name='medical_records_api'),  
     path('api/medical-records/<int:pk>/', views.medical_record_detail, name='medical_record_detail_api'),
     path('api/appointments/', views.appointments, name='appointments_api'),

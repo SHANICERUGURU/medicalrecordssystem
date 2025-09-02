@@ -39,6 +39,7 @@ class User(AbstractUser):
     
     gender = models.CharField(max_length=1, choices=Gender.choices, default='F')  # Fixed reference
     phone = models.CharField(max_length=15, default='0000000000')
+    
 
    
 class Patient(models.Model):
@@ -66,15 +67,9 @@ class Patient(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.user.first_name} {self.user.last_name}"
     
-    def save(self, *args, **kwargs):
-        # Auto-populate first_name and last_name from user if not set
-        if not self.first_name and self.user.first_name:
-            self.first_name = self.user.first_name
-        if not self.last_name and self.user.last_name:
-            self.last_name = self.user.last_name
-        super().save(*args, **kwargs)
+    
 
 
 class MedicalRecord(models.Model):
@@ -88,7 +83,7 @@ class MedicalRecord(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Record for {self.patient.first_name} {self.patient.last_name} on {self.date}"   
+        return f"Record for {self.user.first_name} {self.patient.last_name} on {self.date}"   
 
 
 class Appointment(models.Model):

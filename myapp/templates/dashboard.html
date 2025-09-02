@@ -7,7 +7,7 @@
     
     <h2 class="mb-4 text-primary">
   {% if patient %}
-    {{ patient.first_name }} {{ patient.last_name }}'s Dashboard
+    {{ user.username }}'s Dashboard
   {% else %}
     {{ user.display_patient_name }}'s Dashboard
   {% endif %}
@@ -17,7 +17,7 @@
       <!-- Patient Records Section -->
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-info text-white">
-        <h5 class="mb-0">{{ patient.first_name }}'s Medical Records</h5>
+        <h5 class="mb-0">{{ user.first_name }}'s Medical Records</h5>
     </div>
     <div class="card-body">
         <ul class="list-group">
@@ -38,7 +38,7 @@
 <!-- Patient Appointments Section -->
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-success text-white">
-        <h5 class="mb-0">{{ patient.first_name }}'s Appointments</h5>
+        <h5 class="mb-0">{{ user.first_name }}'s Appointments</h5>
     </div>
     <div class="card-body">
         <ul class="list-group">
