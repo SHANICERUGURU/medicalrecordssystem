@@ -27,15 +27,7 @@ class RegisterForm(UserCreationForm):
      
     
         
-class MedicalRecordForm(forms.ModelForm):
-    class Meta:
-        model = MedicalRecord
-        fields = ['diagnosis', 'treatment', 'date', 'doctor', 'notes']
-        
-    def __init__(self, *args, **kwargs):
-        super(MedicalRecordForm, self).__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs['class'] = 'form-control'    
+
 
 class AppointmentForm(forms.ModelForm):
     class Meta :

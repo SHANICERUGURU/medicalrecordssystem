@@ -163,15 +163,7 @@ def patient_list(request):
     }
     
     return render(request, 'patientlist.html', context)
-@api_view(['GET'])
-def medical_records(request):
-    try:
-        patient = request.user.patient_profile
-    except AttributeError:
-        return Response({'error': 'Patient profile not found'}, status=403)
-    records = MedicalRecord.objects.filter(patient=patient)
-    serializers = MedicalRecordserializer(records, many=True)
-    return Response(serializers.data)
+
     
 @api_view(['GET', 'POST'])
 def appointments(request):
@@ -223,87 +215,6 @@ def appointment_page(request):
         "form": form,
         "patient": patient,
     })
-
-  
-@api_view(['GET', 'POST'])
-def medical_records_list(request):
-    if request.method == 'GET':
-        try:
-            patient = request.user.patient_profile
-            records = MedicalRecord.objects.filter(patient=patient)
-            serializers = MedicalRecordserializer(records, many=True)
-            return Response(serializers.data)
-        except AttributeError:
-            return Response({'error': 'Patient profile not found'}, status=403)
-    
-    elif request.method == 'POST':
-        try:
-            patient = request.user.patient_profile
-            serializers = MedicalRecordserializer(data=request.data)
-            if serializers.is_valid():
-                serializers.save(patient=patient)
-                return Response(serializers.data, status=status.HTTP_201_CREATED)
-            return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
-        except AttributeError:
-            return Response({'error': 'Patient profile not found'}, status=403)
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def medical_record_detail(request, pk):
-    try:
-       if request.user.is_doctor():
-           record = MedicalRecord.objects.get(pk=pk)
-       else:
-              patient = request.user.patient_profile
-              record = MedicalRecord.objects.get(pk=pk, patient=patient) 
-    except MedicalRecord.DoesNotExist:
-        return Response({'error': 'Medical record not found'}, status=404)
-    
-    if request.method == 'GET':
-        serializers = MedicalRecordserializer(record)
-        return Response(serializers.data)
-    
-    elif request.method == 'PUT':
-        serializers = MedicalRecordserializer(record, data=request.data, partial=True)
-        if serializers.is_valid():
-            serializers.save()
-            return Response(serializers.data)
-        return Response(serializers.errors, status=400)
-    
-    elif request.method == 'DELETE':
-        record.delete()
-        return Response(status=204)
-    
-@login_required
-def medical_record_view(request, patient_id):
-    try:
-        patient = Patient.objects.get(pk=patient_id)
-    except Patient.DoesNotExist:
-        messages.error(request, "Patient not found.")
-        return redirect('dashboard')
-
-    if request.method == 'POST':
-        form = MedicalRecordForm(request.POST)
-        if form.is_valid():
-            record = form.save(commit=False)
-            record.patient = patient  # link record to this patient
-            record.save()
-            messages.success(request, "Medical record added successfully.")
-            return redirect('medical_record_view', patient_id=patient.id)
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = MedicalRecordForm()
-
-    # Show all patient records alongside the form
-    records = MedicalRecord.objects.filter(patient=patient)
-
-    return render(request, 'medicalrecords.html', {
-        'form': form,
-        'patient': patient,
-        'records': records
-    })
-   
-
     
 @api_view(['GET', 'PUT', 'POST'])
 def user_profile(request):
@@ -329,18 +240,15 @@ def dashboard(request):
     # Check if patient profile exists using try/except for better error handling
     try:
         patient = user.patient_profile
-        records = MedicalRecord.objects.filter(patient=patient)
         appointments = Appointment.objects.filter(patient=patient)
     except AttributeError:
         # patient_profile doesn't exist
         patient = None
-        records = MedicalRecord.objects.none()
         appointments = Appointment.objects.none()
     
     return render(request, 'dashboard.html', {
         'user': user,
         'patient': patient,
-        'records': records,
         'appointments': appointments
     })
 
@@ -421,7 +329,5 @@ def my_profile_edit(request,pk):
     return render(request, 'my_profile_form.html', {'form': form, 'mode': 'edit'})
 
 
-# def custom_logout(request):
-#     logout(request)
-#     return redirect (' '' ')
+
 

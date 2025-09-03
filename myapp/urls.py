@@ -17,9 +17,6 @@ urlpatterns = [
     path('patients/', views.patient_list, name='patient_list'),  
     path('patients/<int:pk>/edit/', views.doctor_edit_patient, name='doctor_edit_patient'), 
     
-    # Medical record HTML view
-    path('patients/<int:patient_id>/medical-records/', views.medical_record_view, name='medical_record_view'),  
-    
     # Auth URLs
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='landing'), name='logout'),
@@ -29,7 +26,5 @@ urlpatterns = [
     path('api/patients/<int:pk>/', views.patient_detail, name='patient_detail_api'),
     path('api/user/profile/', views.user_profile, name='user_profile_api'),
     path('api/users/',views.UserPost, name= 'user-post'),
-    path('api/medical-records/', views.medical_records_list, name='medical_records_api'),  
-    path('api/medical-records/<int:pk>/', views.medical_record_detail, name='medical_record_detail_api'),
     path('api/appointments/', views.appointments, name='appointments_api'),
 ]

@@ -26,10 +26,7 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.role})"  # Added __str__ method for better representation
     
-    # first_name = models.CharField(max_length=100)
-    # last_name = models.CharField(max_length=100)
-    # username=models.CharField(max_length=100)
-    # email = models.EmailField(unique=True)
+   
     date_of_birth = models.DateField(null=True)
     
     class Gender(models.TextChoices):  # Using Django choices class pattern
@@ -72,18 +69,7 @@ class Patient(models.Model):
     
 
 
-class MedicalRecord(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='medical_records')
-    diagnosis = models.CharField(max_length=200)
-    treatment = models.TextField()
-    date = models.DateField()
-    doctor = models.CharField(max_length=100)
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"Record for {self.user.first_name} {self.patient.last_name} on {self.date}"   
 
 
 class Appointment(models.Model):

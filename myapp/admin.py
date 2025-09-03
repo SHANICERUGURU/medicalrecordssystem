@@ -14,7 +14,6 @@ class PatientAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Patient)
-admin.site.register(MedicalRecord)
 admin.site.register(Appointment)
 admin.site.register(User)
 
