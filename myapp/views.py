@@ -165,8 +165,8 @@ def medical_records(request):
 def appointments(request):
     if request.method == 'GET':
         try:
-            patient = request.user.patient_profile
-            appointments = Appointment.objects.filter(patient=patient)
+            # patient = request.user.patient_profile
+            appointments = Appointment.objects.all()
             serializer = Appointmentserializer(appointments, many=True)
             return Response(serializer.data)
         except AttributeError:
