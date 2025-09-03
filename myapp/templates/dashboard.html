@@ -2,70 +2,55 @@
 
 {% block content %}
 <div class="container mt-5">
-  <!-- if the user is already authenticated -->
+  <!-- Authentication Check -->
   {% if user.is_authenticated %}
     
     <h2 class="mb-4 text-primary">
-  {% if patient %}
-    {{ user.username }}'s Dashboard
-  {% else %}
-    {{ user.display_patient_name }}'s Dashboard
-  {% endif %}
-</h2>
+      {% if patient %}
+        Welcome, {{ patient.user.get_full_name|default:user.username }}!
+      {% else %}
+        Welcome, {{ user.get_full_name|default:user.username }}!
+      {% endif %}
+    </h2>
 
     {% if patient %}
       <!-- Patient Records Section -->
-<div class="card shadow-sm mb-4">
-  <div class="card-header bg-primary text-white">
-    <h5 class="mb-0">Health Profile</h5>
-  </div>
-  <div class="card-body">
-    <p><strong>Blood Type:</strong> {{ patient.blood_type|default:"Not provided" }}</p>
-    <p><strong>Allergies:</strong> {{ patient.allergies|default:"None reported" }}</p>
-    <p><strong>Chronic Illness:</strong> {{ patient.chronic_illness|default:"None reported" }}</p>
-    <p><strong>Last Appointment:</strong> {{ patient.last_appointment|date:"M d, Y"|default:"No record" }}</p>
-    <p><strong>Last Doctor:</strong> {{ patient.last_doctor|default:"Not specified" }}</p>
-    <p><strong>Emergency Contact:</strong> {{ patient.emergency_contact_name }} ({{ patient.emergency_contact_phone }})</p>
-    <p><strong>Insurance Type:</strong> {{ patient.insurance_type|default:"Not provided" }}</p>
-    <p><strong>Current Medications:</strong> {{ patient.current_medications|default:"None" }}</p>
-    <p><strong>Family Medical History:</strong> {{ patient.family_medical_history|default:"Not provided" }}</p>
-  </div>
-</div>
-
-
-<!-- Patient Appointments Section -->
-<!-- <div class="card shadow-sm mb-4">
-    <div class="card-header bg-success text-white">
-        <h5 class="mb-0">{{ user.first_name }}'s Appointments</h5>
-    </div>
-    <div class="card-body">
-        <ul class="list-group">
-            {% for appointment in appointments %}
-                <li class="list-group-item">
-                    <strong>Date & Time:</strong> {{ appointment.date_time }}<br>
-                    <strong>Doctor:</strong> {{ appointment.doctor }}<br>
-                    <strong>Reason:</strong> {{ appointment.reason }}<br>
-                    <strong>Status:</strong> {{ appointment.get_status_display }}
-                </li>
-            {% empty %}
-                <li class="list-group-item text-muted">No appointments yet.</li>
-            {% endfor %}
-        </ul>
-    </div>
-</div> -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Health Profile</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>Blood Type:</strong> {{ patient.blood_type|default:"Not provided" }}</p>
+          <p><strong>Allergies:</strong> {{ patient.allergies|default:"None reported" }}</p>
+          <p><strong>Chronic Illness:</strong> {{ patient.chronic_illness|default:"None reported" }}</p>
+          <p><strong>Last Appointment:</strong> {{ patient.last_appointment|date:"M d, Y"|default:"No record" }}</p>
+          <p><strong>Last Doctor:</strong> {{ patient.last_doctor|default:"Not specified" }}</p>
+          {% if patient.emergency_contact_name and patient.emergency_contact_phone %}
+            <p><strong>Emergency Contact:</strong> {{ patient.emergency_contact_name }} ({{ patient.emergency_contact_phone }})</p>
+          {% else %}
+            <p><strong>Emergency Contact:</strong> Not provided</p>
+          {% endif %}
+          <p><strong>Insurance Type:</strong> {{ patient.insurance_type|default:"Not provided" }}</p>
+          <p><strong>Current Medications:</strong> {{ patient.current_medications|default:"None" }}</p>
+          <p><strong>Family Medical History:</strong> {{ patient.family_medical_history|default:"Not provided" }}</p>
+        </div>
+      </div>
 
       <!-- Edit Profile Button -->
       <a href="{% url 'my_profile_edit' request.user.id %}" class="btn btn-primary">Edit My Details</a>
 
     {% else %}
+      <!-- User is authenticated but doesn't have a patient profile -->
       <div class="alert alert-warning">
+        <h4 class="alert-heading">Profile Setup Required</h4>
         <p>Welcome! Let's complete your profile so we can personalize your dashboard.</p>
+        <hr>
         <a href="{% url 'profile_setup' %}" class="btn btn-outline-info">Set Up My Profile</a>
       </div>
     {% endif %}
 
   {% else %}
-    <!-- login if user not logged in -->
+    <!-- User is not authenticated -->
     <div class="row justify-content-center">
       <div class="col-md-6">
         <div class="card shadow-lg">
@@ -78,6 +63,10 @@
               {{ form.as_p }}
               <button type="submit" class="btn btn-success w-100">Login</button>
             </form>
+            <hr>
+            <div class="text-center">
+              <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+            </div>
           </div>
         </div>
       </div>
