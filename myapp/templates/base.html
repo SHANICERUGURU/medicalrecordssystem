@@ -10,7 +10,7 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'dashboard' %}">Medical Records</a>
 
@@ -24,7 +24,9 @@
         
         {% if user.is_authenticated %}
           <li class="nav-item">
-            <span class="nav-link disabled">Hi {{ user.username }}</span>
+            <span class="nav-link disabled">
+              Hello, {{ user.get_full_name|default:user.username|default:"User" }}
+            </span>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'landing' %}">Home</a>
@@ -35,6 +37,7 @@
             <a class="nav-link" href="{% url 'dashboard' %}">My Profile</a>
           </li>
           {% endif %}
+          
           {% if user.is_patient %}
           <li class="nav-item">
             <a class="nav-link" href="{% url 'appointments' %}">Appointments</a>
@@ -46,10 +49,23 @@
             <a class="nav-link" href="{% url 'patient_list' %}">Manage Patients</a>
           </li>
           {% endif %}
+
+          <!-- Logout Button -->
+          <li class="nav-item">
+            <form action="{% url 'logout' %}" method="post" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="nav-link btn btn-link" style="border: none; background: none; cursor: pointer; color: rgba(255,255,255,.55); padding: 0.5rem 1rem;">
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </button>
+            </form>
+          </li>
           
         {% else %}
           <li class="nav-item">
             <a class="nav-link" href="{% url 'login' %}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
           </li>
         {% endif %}
 

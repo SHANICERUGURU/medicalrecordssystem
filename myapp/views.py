@@ -407,3 +407,9 @@ def my_profile_edit(request,pk):
         form = PatientForm(instance=profile)
 
     return render(request, 'my_profile_form.html', {'form': form, 'mode': 'edit'})
+
+
+# def custom_logout(request):
+#     logout(request)
+#     return redirect (' '' ')
+
