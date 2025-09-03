@@ -167,26 +167,23 @@ def appointments(request):
         try:
             patient = request.user.patient_profile
             appointments = Appointment.objects.filter(patient=patient)
-            serializers = Appointmentserializer(appointments, many=True)
-            return Response(serializers.data)
+            serializer = Appointmentserializer(appointments, many=True)
+            return Response(serializer.data)
         except AttributeError:
             return Response({'error': 'Patient profile not found'}, status=403)
     
     elif request.method == 'POST':
         try:
             patient = request.user.patient_profile
-            serializers = Appointmentserializer(data=request.data)
-            if serializers.is_valid():
-                serializers.save(patient=patient)
-                return Response(serializers.data, status=status.HTTP_201_CREATED)
-            return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer = Appointmentserializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(patient=patient)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except AttributeError:
             return Response({'error': 'Patient profile not found'}, status=403)
         
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from .models import Appointment
-from .forms import AppointmentForm
+
 
 @login_required
 def appointment_page(request):
@@ -205,7 +202,7 @@ def appointment_page(request):
             appointment.patient = patient
             appointment.save()
             messages.success(request, "Appointment booked successfully!")
-            return redirect("appointment_page")
+            return redirect("appointments")
     else:
         form = AppointmentForm()
 
