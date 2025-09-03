@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">
+            <i class="bi bi-people-fill"></i> Patient Management
+            <span class="badge bg-secondary">{{ total_patients }} patients</span>
+        </h2>
+        
+        <!-- Search and Actions -->
+        <div class="d-flex gap-2">
+            <form class="d-flex" method="GET" action="">
+                <input class="form-control me-2" type="search" placeholder="Search patients..." name="q" 
+                       value="{{ request.GET.q }}">
+                <button class="btn btn-outline-primary" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ total_patients }}</h5>
+                    <p class="card-text">Total Patients</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ patients_with_records }}</h5>
+                    <p class="card-text">With Medical Records</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ recent_patients }}</h5>
+                    <p class="card-text">New This Month</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ appointment_count }}</h5>
+                    <p class="card-text">Upcoming Appointments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patients Table -->
+    <div class="card shadow">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Patient List</h5>
+        </div>
+        <div class="card-body">
+            {% if patients %}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Blood Type</th>
+                            <th>Medical Records</th>
+                            <th>Last Visit</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in patients %}
+                        <tr>
+                            <td>{{ patient.id }}</td>
+                            <td>
+                                <strong>{{ patient.user.get_full_name|default:patient.user.username }}</strong>
+                                {% if patient.emergency_contact_name %}
+                                <br><small class="text-muted">Emergency: {{ patient.emergency_contact_name }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ patient.user.email }}</td>
+                            <td>{{ patient.phone_number|default:"Not provided" }}</td>
+                            <td>
+                                <span class="badge {% if patient.blood_type %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    {{ patient.blood_type|default:"Unknown" }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ patient.medical_records.count }} records
+                                </span>
+                            </td>
+                            <td>
+                                {% if patient.last_appointment %}
+                                {{ patient.last_appointment|date:"M d, Y" }}
+                                {% else %}
+                                <span class="text-muted">Never</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <!-- View Medical Records -->
+                                    <a href="{% url 'medical_record_view' patient.id %}" 
+                                       class="btn btn-sm btn-primary" title="View Medical Records">
+                                        <i class="bi bi-file-medical"></i>
+                                    </a>
+                                    
+                                    <!-- Edit Patient -->
+                                    <a href="{% url 'doctor_edit_patient' patient.id %}" 
+                                       class="btn btn-sm btn-warning" title="Edit Patient">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    
+                                    <!-- View Appointments -->
+                                    <a href="#" class="btn btn-sm btn-info" title="View Appointments">
+                                        <i class="bi bi-calendar"></i>
+                                    </a>
+                                    
+                                    <!-- Quick Actions Dropdown -->
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" 
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-gear"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <i class="bi bi-plus-circle"></i> Add Record
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <i class="bi bi-prescription"></i> Prescribe
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Patient pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-people display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">No Patients Found</h4>
+                <p class="text-muted">There are no patients in the system yet.</p>
+                <a href="#" class="btn btn-primary mt-2">
+                    <i class="bi bi-person-plus"></i> Add First Patient
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Stats Section -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Recent Medical Records</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for record in recent_records|slice:":5" %}
+                        <li class="list-group-item">
+                            <small class="text-muted">{{ record.created_at|date:"M d" }}</small>
+                            {{ record.patient.user.get_short_name }} - {{ record.diagnosis|truncatewords:3 }}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">No recent records</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Upcoming Appointments</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for appointment in upcoming_appointments|slice:":5" %}
+                        <li class="list-group-item">
+                            <small class="text-muted">{{ appointment.date_time|date:"M d, H:i" }}</small>
+                            {{ appointment.patient.user.get_short_name }} with Dr. {{ appointment.doctor }}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">No upcoming appointments</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

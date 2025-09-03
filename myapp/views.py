@@ -140,17 +140,29 @@ def patient_detail(request, pk):
             status=status.HTTP_204_NO_CONTENT
         )
     
+
+
+
+@login_required  
 def patient_list(request):
-    if not request.user.is_doctor():
+    # Check if user is authenticated and is a doctor
+    if not hasattr(request.user, 'is_doctor') or not request.user.is_doctor():
         messages.error(request, '❌ Access denied. Doctor privileges required to view patient lists.')
         return redirect('dashboard')
     
     patients = Patient.objects.all().select_related('user').prefetch_related('medical_records')
-    return render(request, 'patient_list.html', {
-        'patients': patients,
-        'total_patients': patients.count()
-    }) 
 
+    context = {
+        'patients': patients,
+        'total_patients': patients.count(),
+        'patients_with_records': patients.filter(medical_records__isnull=False).distinct().count(),
+        'recent_patients': patients.filter(created_at__month=timezone.now().month).count(),
+        'appointment_count': Appointment.objects.filter(date_time__gte=timezone.now()).count(),
+        'recent_records': MedicalRecord.objects.order_by('-created_at')[:10],
+        'upcoming_appointments': Appointment.objects.filter(date_time__gte=timezone.now()).order_by('date_time')[:10]
+    }
+    
+    return render(request, 'patientlist.html', context)
 @api_view(['GET'])
 def medical_records(request):
     try:
