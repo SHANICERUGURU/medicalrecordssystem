@@ -64,14 +64,14 @@ def patient(request):
         return Response(serializers.data)
 
     elif request.method == 'POST':
-        medical_records_data = request.data.pop('medical_records', [])
         serializers = PatientSerializer(data=request.data)
         if serializers.is_valid():
-            patient = serializers.save(user=request.user)
-            for record_data in medical_records_data:
-                MedicalRecord.objects.create(patient=patient, **record_data)
+            serializers.save()
             return Response(serializers.data, status=status.HTTP_201_CREATED)
         return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
     
 @api_view(['GET', 'PUT', 'DELETE'])
 def patient_detail(request, pk):
@@ -140,9 +140,41 @@ def patient_detail(request, pk):
             status=status.HTTP_204_NO_CONTENT
         )
     
+@api_view(['GET','POST'])
+def doctor_api(request):
+    if request.method == 'GET':
+        doctors=Doctor.objects.all()
+        serializers=DoctorSerializer(doctors, many=True)
+        return Response(serializers.data)
+    
+    elif request.method == 'POST':
+        serializers=DoctorSerializer(data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data, status=status.HTTP_201_CREATED)
+        return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
+@api_view(['GET', 'PUT', 'DELETE'])
+def doctor_detail_api(request, pk):
+    try:
+        doctor = Doctor.objects.get(pk=pk)
+    except Doctor.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = DoctorSerializer(doctor)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = DoctorSerializer(doctor, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        doctor.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 @login_required  
 def patient_list(request):
     # Check if user is authenticated and is a doctor
@@ -158,7 +190,6 @@ def patient_list(request):
         'patients_with_records': patients.filter(medical_records__isnull=False).distinct().count(),
         'recent_patients': patients.filter(created_at__month=timezone.now().month).count(),
         'appointment_count': Appointment.objects.filter(date_time__gte=timezone.now()).count(),
-        'recent_records': MedicalRecord.objects.order_by('-created_at')[:10],
         'upcoming_appointments': Appointment.objects.filter(date_time__gte=timezone.now()).order_by('date_time')[:10]
     }
     
@@ -237,18 +268,22 @@ def user_profile(request):
 def dashboard(request):
     user = request.user
     
-    # Check if patient profile exists using try/except for better error handling
-    try:
-        patient = user.patient_profile
+    # Check if profiles exist
+    patient = getattr(user, 'patient_profile', None)
+    doctor = getattr(user, 'doctor_profile', None)
+    
+    # Get appointments based on user type
+    if patient:
         appointments = Appointment.objects.filter(patient=patient)
-    except AttributeError:
-        # patient_profile doesn't exist
-        patient = None
+    elif doctor:
+        appointments = Appointment.objects.filter(doctor=doctor)
+    else:
         appointments = Appointment.objects.none()
     
     return render(request, 'dashboard.html', {
         'user': user,
         'patient': patient,
+        'doctor': doctor,
         'appointments': appointments
     })
 
@@ -329,5 +364,59 @@ def my_profile_edit(request,pk):
     return render(request, 'my_profile_form.html', {'form': form, 'mode': 'edit'})
 
 
+@login_required
+def doctor_profile_setup(request):
+    # Check if user already has a doctor profile
+    if hasattr(request.user, 'doctor_profile'):
+        messages.info(request, 'You already have a doctor profile.')
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        form = DoctorForm(request.POST)
+        if form.is_valid():
+            # Create doctor profile but don't save yet
+            doctor = form.save(commit=False)
+            doctor.user = request.user  # Associate with current user
+            doctor.save()
+            messages.success(request, 'Doctor profile created successfully!')
+            return redirect('dashboard')
+    else:
+        form = DoctorForm()
+    
+    return render(request, 'doctorregistration.html', {
+        'form': form,
+        'title': 'Doctor Profile Setup'
+    })
 
+
+@login_required
+def doctor_profile_edit(request, pk):
+    # Verify the user is editing their own profile
+    if request.user.id != pk:
+        messages.error(request, 'You can only edit your own profile.')
+        return redirect('dashboard')
+    
+    # Check if user has a doctor profile
+    if not hasattr(request.user, 'doctor_profile'):
+        messages.info(request, 'Please complete your doctor profile setup first.')
+        return redirect('doctorprofilesetup')
+    
+    try:
+        profile = request.user.doctor_profile
+    except AttributeError:
+        messages.info(request, 'Please complete your doctor profile setup first.')
+        return redirect('doctorprofilesetup')
+
+    if request.method == 'POST':
+        form = DoctorForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Doctor profile updated successfully.')
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = DoctorForm(instance=profile)
+
+    return render(request, 'doctorregistration.html', {'form': form, 'mode': 'edit'})
 

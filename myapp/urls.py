@@ -12,6 +12,8 @@ urlpatterns = [
     # Profile URLs
     path('profile/setup/', views.profile_setup, name='profile_setup'),
     path('profile/edit/<int:pk>/', views.my_profile_edit, name='my_profile_edit'), 
+    path('doctor/setup/', views.doctor_profile_setup,name='doctorprofilesetup'),
+    path('doctor/edit/<int:pk>/', views.doctor_profile_edit, name='doctoreditprofile'),
     
     # Patient management URLs (for doctors)
     path('patients/', views.patient_list, name='patient_list'),  
@@ -24,6 +26,8 @@ urlpatterns = [
     # API URLs
     path('api/patients/', views.patient, name='patient_api'),
     path('api/patients/<int:pk>/', views.patient_detail, name='patient_detail_api'),
+    path('api/doctors/', views.doctor_api, name='doctor_api'),
+    path('api/doctors/<int:pk>/', views.doctor_detail_api, name= 'doctor_detail'),
     path('api/user/profile/', views.user_profile, name='user_profile_api'),
     path('api/users/',views.UserPost, name= 'user-post'),
     path('api/appointments/', views.appointments, name='appointments_api'),

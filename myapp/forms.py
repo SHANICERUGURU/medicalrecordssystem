@@ -12,6 +12,22 @@ class PatientForm(forms.ModelForm):
         super(PatientForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+            
+
+class DoctorForm(forms.ModelForm):
+    class Meta:
+        model=Doctor
+        fields=['specialty', 'hospital', 'license_number']
+
+    def __init__(self, *args, **kwargs):
+        super(DoctorForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+    
+
+
+
+
 
 User = get_user_model()       
 class RegisterForm(UserCreationForm):

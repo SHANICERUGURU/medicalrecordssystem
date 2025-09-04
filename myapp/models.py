@@ -66,11 +66,29 @@ class Patient(models.Model):
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
     
-    
+class Doctor(models.Model) :
+    user=models.OneToOneField(
+       settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE,
+        related_name='doctor_profile'
+    )
+    class Specialty(models.TextChoices):
+        generaldoctor = 'GENERALDOCTOR','generaldoctor'
+        dentist = 'DENTIST', 'dentist'
+        oncologist = 'ONCOLOGIST','oncologist'
+        orthopaedic = 'ortho', 'orthopaedic'
+        optician = 'OPTICIAN', 'optician'
+        paediatrician = 'PAEDIATRICIAN', 'paediatrician'
+        cardiologist = 'cardio', 'cardiologist'
 
+    specialty= models.CharField(max_length=100, choices=Specialty.choices, default='generaldotor')    
+    hospital=models.CharField(max_length=100)
+    license_number=models.CharField (max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-
-
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
 
 class Appointment(models.Model):
     appointment_status=[
@@ -83,10 +101,10 @@ class Appointment(models.Model):
     doctor=models.CharField(max_length=100)
     reason=models.TextField()
     status=models.CharField(max_length=20, choices=appointment_status, default='SCHEDULED')
-    created_at = models.DateTimeField(auto_now_add=True)  # Add this
-    updated_at = models.DateTimeField(auto_now=True)      # Add this
+    created_at = models.DateTimeField(auto_now_add=True)  
+    updated_at = models.DateTimeField(auto_now=True)      
 
-    def __str__(self):  # Add this method
+    def __str__(self):  
         return f"Appointment with Dr. {self.doctor} on {self.date_time}"
     
 
