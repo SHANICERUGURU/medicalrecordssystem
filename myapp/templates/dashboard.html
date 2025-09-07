@@ -20,9 +20,22 @@
       <!-- Logout Button on the right -->
       <form action="{% url 'logout' %}" method="post" class="d-inline">
         {% csrf_token %}
-        <button type="submit" class="btn btn-outline-danger">Logout</button>
+       
       </form>
     </div>
+
+    <!-- Role Mismatch Warning -->
+    {% if role_mismatch %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <h4 class="alert-heading">Profile Role Mismatch!</h4>
+      <p>You registered as a <strong>{{ user_role }}</strong> but set up a <strong>{{ profile_type }}</strong> profile.</p>
+      <p>Please contact administration to resolve this issue or 
+        <a href="{% url 'delete_profile' %}" class="alert-link">delete your current profile</a> 
+        to set up the correct one.
+      </p>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
 
     {% if patient %}
       <!-- Patient Records Section -->
@@ -66,8 +79,6 @@
 
       <!-- Doctor-specific actions -->
       <div class="d-grid gap-2 d-md-block mb-3">
-        <a href="#" class="btn btn-info me-md-2">View My Appointments</a>
-        <a href="#" class="btn btn-info me-md-2">My Patients</a>
         <a href="{% url 'doctoreditprofile' request.user.id %}" class="btn btn-primary">Edit My Professional Details</a>
       </div>
 
@@ -82,6 +93,7 @@
         </div>
         <hr>
         <div class="d-grid gap-2 d-md-block">
+          <a href="{% url 'profile_setup' %}" class="btn btn-outline-primary me-2">Set Up Patient Profile</a>
           <a href="{% url 'doctorprofilesetup' %}" class="btn btn-outline-info">Set Up Doctor Profile</a>
         </div>
       </div>

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils import timezone
+from datetime import date, time,datetime
 
 class User(AbstractUser):
     class Role(models.TextChoices):  # Changed 'roles' to 'Role' (PascalCase for classes)
@@ -97,7 +98,8 @@ class Appointment(models.Model):
         ('CANCELLED','Cancelled')
     ]
     patient=models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments')
-    date_time=models.DateTimeField()
+    date=models.DateField(default='2023-01-01')  
+    time= models.TimeField(default='12:00:00') 
     doctor=models.ForeignKey(Doctor,on_delete=models.CASCADE,related_name='appointments',null=True,blank=True)
     reason=models.TextField()
     status=models.CharField(max_length=20, choices=appointment_status, default='SCHEDULED')
@@ -105,8 +107,4 @@ class Appointment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)      
 
     def __str__(self):  
-        return f"Appointment with Dr. {self.doctor} on {self.date_time}"
-    
-
-
-    
+        return f"Appointment with Dr. {self.doctor} on {self.date} at {self.time}"

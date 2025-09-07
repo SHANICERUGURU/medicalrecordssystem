@@ -7,12 +7,12 @@
             <i class="bi bi-people-fill"></i> Patient Management
             <span class="badge bg-secondary">{{ total_patients }} patients</span>
         </h2>
-        
+
         <!-- Search and Actions -->
         <div class="d-flex gap-2">
             <form class="d-flex" method="GET" action="">
-                <input class="form-control me-2" type="search" placeholder="Search patients..." name="q" 
-                       value="{{ request.GET.q }}">
+                <input class="form-control me-2" type="search" placeholder="Search patients..." name="q"
+                    value="{{ request.GET.q }}">
                 <button class="btn btn-outline-primary" type="submit">
                     <i class="bi bi-search"></i>
                 </button>
@@ -89,7 +89,8 @@
                             <td>{{ patient.user.email }}</td>
                             <td>{{ patient.phone_number|default:"Not provided" }}</td>
                             <td>
-                                <span class="badge {% if patient.blood_type %}bg-danger{% else %}bg-secondary{% endif %}">
+                                <span
+                                    class="badge {% if patient.blood_type %}bg-danger{% else %}bg-secondary{% endif %}">
                                     {{ patient.blood_type|default:"Unknown" }}
                                 </span>
                             </td>
@@ -107,23 +108,23 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    
-                                    
+
+
                                     <!-- Edit Patient -->
-                                    <a href="{% url 'doctor_edit_patient' patient.id %}" 
-                                       class="btn btn-sm btn-warning" title="Edit Patient">
+                                    <a href="{% url 'doctor_edit_patient' patient.id %}" class="btn btn-sm btn-warning"
+                                        title="Edit Patient">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    
+
                                     <!-- View Appointments -->
                                     <a href="#" class="btn btn-sm btn-info" title="View Appointments">
                                         <i class="bi bi-calendar"></i>
                                     </a>
-                                    
+
                                     <!-- Quick Actions Dropdown -->
                                     <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" 
-                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                        <button type="button" class="btn btn-sm btn-secondary dropdown-toggle"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
                                             <i class="bi bi-gear"></i>
                                         </button>
                                         <ul class="dropdown-menu">
@@ -137,7 +138,9 @@
                                                     <i class="bi bi-prescription"></i> Prescribe
                                                 </a>
                                             </li>
-                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
                                             <li>
                                                 <a class="dropdown-item text-danger" href="#">
                                                     <i class="bi bi-trash"></i> Delete
@@ -162,13 +165,13 @@
                         <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
                     </li>
                     {% endif %}
-                    
+
                     {% for num in page_obj.paginator.page_range %}
                     <li class="page-item {% if page_obj.number == num %}active{% endif %}">
                         <a class="page-link" href="?page={{ num }}">{{ num }}</a>
                     </li>
                     {% endfor %}
-                    
+
                     {% if page_obj.has_next %}
                     <li class="page-item">
                         <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>

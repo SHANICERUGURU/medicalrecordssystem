@@ -43,14 +43,38 @@ class RegisterForm(UserCreationForm):
      
     
         
-
-
 class AppointmentForm(forms.ModelForm):
-    class Meta :
-        model = Appointment  
-        fields =['date_time', 'doctor', 'reason','status']       
-
-def __init__(self, *args, **kwargs):
-        super(AppointmentForm, self).__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs['class'] = 'form-control'
+    specialty = forms.ChoiceField(
+        choices=Doctor.Specialty.choices,
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control', 'onchange': 'this.form.submit()'})
+    )
+    
+    class Meta:
+        model = Appointment
+        fields = ['specialty', 'doctor', 'date', 'time'] 
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Always filter doctors based on specialty from form data
+        if self.data.get('specialty'):
+            specialty = self.data.get('specialty')
+            self.fields['doctor'].queryset = Doctor.objects.filter(specialty=specialty)
+        else:
+            self.fields['doctor'].queryset = Doctor.objects.none()
+        
+        # Add placeholders and improve UX
+        self.fields['date'].widget = forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+        self.fields['time'].widget = forms.TimeInput(attrs={
+            'class': 'form-control',
+            'type': 'time'
+        })
+        
+        # Add Bootstrap classes to all fields
+        for field_name, field in self.fields.items():
+            if field_name != 'specialty':
+                field.widget.attrs['class'] = 'form-control'

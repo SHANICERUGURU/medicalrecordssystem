@@ -15,20 +15,38 @@ def landingPage(request):
     return render (request, 'landing.html')
 
 def RegistrationView(request):
-
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password1'])
             user.save()
-            messages.success(request, 'Registration successful. You can now log in.')
-            return redirect('login')
+            
+            role = form.cleaned_data.get('role')
+            request.session['registration_role'] = role
+            
+            # REDIRECT TO PROFILE SETUP (NO AUTO-CREATION)
+            if role == 'patient':
+                messages.success(request, 'Registration successful. Please set up your patient profile.')
+                return redirect('patientprofilesetup')  # Go to profile creation page
+                
+            elif role == 'doctor':
+                messages.success(request, 'Registration successful. Please set up your doctor profile.')
+                return redirect('doctorprofilesetup')  # Go to profile creation page
+            
+            else:
+                # Handle case where role is neither patient nor doctor
+                messages.success(request, 'Registration successful. You can now log in.')
+                return redirect('login')
+                
         else:
-            messages.error(request, 'Please correct the error below.')
+            messages.error(request, 'Please correct the errors below.')
+            # Return the form with errors
+            return render(request, 'registration.html', {'form': form})
+    
     else:
         form = RegisterForm()
-    return render(request, 'registration.html', {'form': form})
+        return render(request, 'registration.html', {'form': form})
 
 @api_view(['POST','GET'])
 def UserPost(request):
@@ -218,36 +236,35 @@ def appointments(request):
             return Response({'error': 'Patient profile not found'}, status=403)
         
 
-
 @login_required
 def appointment_page(request):
     try:
         patient = request.user.patient_profile
     except AttributeError:
         messages.error(request, "You must complete your patient profile first.")
-        return redirect("profile_setup")
+        return redirect("profile_setup") 
 
     appointments = Appointment.objects.filter(patient=patient)
-
-    specialty = request.POST.get("specialty") if request.method == "POST" else None
+    keep_form_open = request.GET.get('specialty') is not None
 
     if request.method == "POST":
-        form = AppointmentForm(request.POST, specialty=specialty)
+        form = AppointmentForm(request.POST) 
         if form.is_valid():
             appointment = form.save(commit=False)
             appointment.patient = patient
             appointment.save()
             messages.success(request, "Appointment booked successfully!")
-            return redirect("appointments")
+            return redirect("appointments")  
     else:
-        form = AppointmentForm(specialty=specialty)
+        form = AppointmentForm() 
 
     return render(request, "appointments.html", {
         "appointments": appointments,
         "form": form,
         "patient": patient,
+        "doctor_specialties":Doctor.Specialty.choices,
+        "keep_form_open": keep_form_open,
     })
-
 
 @login_required
 def update_appointment_status(request, appointment_id):
@@ -284,28 +301,43 @@ def user_profile(request):
     
          
 
+
+
 @login_required
 def dashboard(request):
+    context = {}
     user = request.user
     
-    # Check if profiles exist
-    patient = getattr(user, 'patient_profile', None)
-    doctor = getattr(user, 'doctor_profile', None)
+    # Check user's intended role from registration
+    registration_role = request.session.get('registration_role')
     
-    # Get appointments based on user type
-    if patient:
-        appointments = Appointment.objects.filter(patient=patient)
-    elif doctor:
-        appointments = Appointment.objects.filter(doctor=doctor)
+    # Check actual profiles
+    has_patient_profile = hasattr(user, 'patient_profile')
+    has_doctor_profile = hasattr(user, 'doctor_profile')
+    
+    # Set context based on actual profiles
+    if has_patient_profile:
+        context['patient'] = user.patient_profile
+        appointments = Appointment.objects.filter(patient=user.patient_profile)
+    elif has_doctor_profile:
+        context['doctor'] = user.doctor_profile
+        appointments = Appointment.objects.filter(doctor=user.doctor_profile)
     else:
         appointments = Appointment.objects.none()
     
-    return render(request, 'dashboard.html', {
-        'user': user,
-        'patient': patient,
-        'doctor': doctor,
-        'appointments': appointments
-    })
+    # Check for role mismatch
+    if registration_role:
+        if (registration_role == 'patient' and has_doctor_profile) or \
+           (registration_role == 'doctor' and has_patient_profile):
+            context['role_mismatch'] = True
+            context['user_role'] = registration_role
+            context['profile_type'] = 'doctor' if has_doctor_profile else 'patient'
+    
+    context['appointments'] = appointments
+    context['user'] = user
+    
+    return render(request, 'dashboard.html', context)
+
 
 @login_required
 def profile_setup(request):
