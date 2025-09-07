@@ -8,6 +8,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('appointments/', views.appointment_page,name='appointments'),
     path('patientlist/', views.patient_list, name='patient-list'),
+    path('patient/<int:pk>/', views.patient_detail_view, name='patient_detail'),
     
     # Profile URLs
     path('profile/setup/', views.profile_setup, name='profile_setup'),

@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-primary mb-1">
+                <i class="bi bi-person-circle"></i> Patient Profile
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'patient_list' %}">Patients</a></li>
+                    <li class="breadcrumb-item active">{{ patient.user.get_full_name }}</li>
+                </ol>
+            </nav>
+        </div>
+        <a href="{% url 'patient_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Patients
+        </a>
+    </div>
+
+    <!-- Patient Information Card -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-person-fill text-white" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                    
+                    <h6 class="text-muted">Basic Details</h6>
+                    <p class="mb-1"><strong>Name:</strong> {{ patient.user.get_full_name }}</p>
+                    <p class="mb-1"><strong>Username:</strong> {{ patient.user.username }}</p>
+                    <p class="mb-1"><strong>Email:</strong> {{ patient.user.email }}</p>
+                    <p class="mb-1"><strong>Phone:</strong> {{ patient.phone_number|default:"Not provided" }}</p>
+                    
+                    <hr>
+                    
+                    <h6 class="text-muted">Medical Information</h6>
+                    <p class="mb-1"><strong>Blood Type:</strong> 
+                        <span class="badge bg-danger">{{ patient.blood_type|default:"Unknown" }}</span>
+                    </p>
+                    <p class="mb-1"><strong>Allergies:</strong> {{ patient.allergies|default:"None" }}</p>
+                    <p class="mb-1"><strong>Chronic Conditions:</strong> {{ patient.chronic_illness|default:"None" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Emergency Contact Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">Emergency Contact</h5>
+                </div>
+                <div class="card-body">
+                    {% if patient.emergency_contact_name %}
+                    <p class="mb-1"><strong>Name:</strong> {{ patient.emergency_contact_name }}</p>
+                    <p class="mb-1"><strong>Phone:</strong> {{ patient.emergency_contact_phone }}</p>
+                    {% else %}
+                    <p class="text-muted">No emergency contact information provided</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Insurance Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Insurance Information</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Insurance Type:</strong> {{ patient.insurance_type|default:"Not provided" }}</p>
+                    <p class="mb-1"><strong>Insurance ID:</strong> {{ patient.insurance_id|default:"Not provided" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments Section -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Appointment History</h5>
+        </div>
+        <div class="card-body">
+            {% if appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Doctor</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                        <tr>
+                            <td>{{ appointment.date|date:"M d, Y" }}</td>
+                            <td>{{ appointment.time|time:"H:i" }}</td>
+                            <td>Dr. {{ appointment.doctor.user.get_full_name }}</td>
+                            <td>{{ appointment.reason }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if appointment.status == 'SCHEDULED' %}bg-warning
+                                    {% elif appointment.status == 'COMPLETED' %}bg-success
+                                    {% elif appointment.status == 'CANCELLED' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ appointment.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-calendar-x display-4 text-muted"></i>
+                <p class="text-muted mt-3">No appointments found for this patient</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex gap-2 mt-4">
+        <a href="{% url 'doctor_edit_patient' patient.id %}" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> Edit Patient
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 0;
+}
+.card {
+    border: none;
+    border-radius: 10px;
+}
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+</style>
+{% endblock %}

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -206,13 +206,19 @@ def patient_list(request):
         'patients': patients,
         'total_patients': patients.count(),
         'recent_patients': patients.filter(created_at__month=timezone.now().month).count(),
-        'appointment_count': Appointment.objects.filter(date_time__gte=timezone.now()).count(),
-        'upcoming_appointments': Appointment.objects.filter(date_time__gte=timezone.now()).order_by('date_time')[:10]
+        'appointment_count': Appointment.objects.filter(date__gte=timezone.now().date()).count(),
+        'upcoming_appointments': Appointment.objects.filter(date__gte=timezone.now().date()).order_by('date', 'time')[:10]
     }
     
     return render(request, 'patientlist.html', context)
 
-    
+def patient_detail_view(request, pk):
+    patient = get_object_or_404(Patient, id=pk)
+    appointments = Appointment.objects.filter(patient=patient)
+    return render(request, 'patient_detail.html', {
+        'patient': patient,
+        'appointments': appointments
+    })    
 @api_view(['GET', 'POST'])
 def appointments(request):
     if request.method == 'GET':
