@@ -30,14 +30,14 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <!-- <div class="col-md-3">
             <div class="card bg-success text-white text-center">
                 <div class="card-body">
                     <h5 class="card-title">{{ patients_with_records }}</h5>
                     <p class="card-text">With Medical Records</p>
                 </div>
             </div>
-        </div>
+        </div> -->
         <div class="col-md-3">
             <div class="card bg-info text-white text-center">
                 <div class="card-body">
@@ -72,7 +72,6 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Blood Type</th>
-                            <th>Medical Records</th>
                             <th>Last Visit</th>
                             <th>Actions</th>
                         </tr>
@@ -108,11 +107,7 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <!-- View Medical Records -->
-                                    <a href="{% url 'medical_record_view' patient.id %}" 
-                                       class="btn btn-sm btn-primary" title="View Medical Records">
-                                        <i class="bi bi-file-medical"></i>
-                                    </a>
+                                    
                                     
                                     <!-- Edit Patient -->
                                     <a href="{% url 'doctor_edit_patient' patient.id %}" 
@@ -198,7 +193,7 @@
 
     <!-- Quick Stats Section -->
     <div class="row mt-4">
-        <div class="col-md-6">
+        <!-- <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
                     <h6 class="mb-0">Recent Medical Records</h6>
@@ -216,7 +211,7 @@
                     </ul>
                 </div>
             </div>
-        </div>
+        </div> -->
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">

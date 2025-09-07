@@ -182,12 +182,11 @@ def patient_list(request):
         messages.error(request, '❌ Access denied. Doctor privileges required to view patient lists.')
         return redirect('dashboard')
     
-    patients = Patient.objects.all().select_related('user').prefetch_related('medical_records')
+    patients = Patient.objects.all().select_related('user')
 
     context = {
         'patients': patients,
         'total_patients': patients.count(),
-        'patients_with_records': patients.filter(medical_records__isnull=False).distinct().count(),
         'recent_patients': patients.filter(created_at__month=timezone.now().month).count(),
         'appointment_count': Appointment.objects.filter(date_time__gte=timezone.now()).count(),
         'upcoming_appointments': Appointment.objects.filter(date_time__gte=timezone.now()).order_by('date_time')[:10]
@@ -230,8 +229,10 @@ def appointment_page(request):
 
     appointments = Appointment.objects.filter(patient=patient)
 
+    specialty = request.POST.get("specialty") if request.method == "POST" else None
+
     if request.method == "POST":
-        form = AppointmentForm(request.POST)
+        form = AppointmentForm(request.POST, specialty=specialty)
         if form.is_valid():
             appointment = form.save(commit=False)
             appointment.patient = patient
@@ -239,13 +240,32 @@ def appointment_page(request):
             messages.success(request, "Appointment booked successfully!")
             return redirect("appointments")
     else:
-        form = AppointmentForm()
+        form = AppointmentForm(specialty=specialty)
 
     return render(request, "appointments.html", {
         "appointments": appointments,
         "form": form,
         "patient": patient,
     })
+
+
+@login_required
+def update_appointment_status(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+
+    # Check if logged-in user is the doctor assigned to this appointment
+    if hasattr(request.user, 'doctor_profile') and appointment.doctor == request.user.doctor_profile:
+        if request.method == "POST":
+            new_status = request.POST.get("status")
+            if new_status in dict(Appointment.appointment_status).keys():
+                appointment.status = new_status
+                appointment.save()
+                messages.success(request, "Appointment status updated.")
+        return redirect("doctor_dashboard")
+    else:
+        messages.error(request, "You are not allowed to update this appointment.")
+        return redirect("dashboard")
+
     
 @api_view(['GET', 'PUT', 'POST'])
 def user_profile(request):

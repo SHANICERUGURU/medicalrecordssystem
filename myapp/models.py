@@ -98,7 +98,7 @@ class Appointment(models.Model):
     ]
     patient=models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments')
     date_time=models.DateTimeField()
-    doctor=models.CharField(max_length=100)
+    doctor=models.ForeignKey(Doctor,on_delete=models.CASCADE,related_name='appointments',null=True,blank=True)
     reason=models.TextField()
     status=models.CharField(max_length=20, choices=appointment_status, default='SCHEDULED')
     created_at = models.DateTimeField(auto_now_add=True)  
