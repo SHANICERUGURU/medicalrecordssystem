@@ -251,24 +251,35 @@ def appointment_page(request):
         return redirect("profile_setup") 
 
     appointments = Appointment.objects.filter(patient=patient)
-    keep_form_open = request.GET.get('specialty') is not None
 
     if request.method == "POST":
-        form = AppointmentForm(request.POST) 
+        form = AppointmentForm(request.POST)
+        
         if form.is_valid():
-            appointment = form.save(commit=False)
-            appointment.patient = patient
-            appointment.save()
-            messages.success(request, "Appointment booked successfully!")
-            return redirect("appointments")  
+            # Check if this is a real appointment booking or just specialty filter
+            if request.POST.get('date') and request.POST.get('time') and request.POST.get('doctor'):
+                # This is a complete appointment booking
+                appointment = form.save(commit=False)
+                appointment.patient = patient
+                appointment.save()
+                messages.success(request, "Appointment booked successfully!")
+                return redirect("appointments")
+            else:
+                # This is just specialty filtering - keep form open
+                keep_form_open = True
+        else:
+            # Form has errors - keep form open
+            keep_form_open = True
     else:
-        form = AppointmentForm() 
+        # For GET requests
+        form = AppointmentForm()
+        keep_form_open = False
 
     return render(request, "appointments.html", {
         "appointments": appointments,
         "form": form,
         "patient": patient,
-        "doctor_specialties":Doctor.Specialty.choices,
+        "doctor_specialties": Doctor.Specialty.choices,
         "keep_form_open": keep_form_open,
     })
 

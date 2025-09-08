@@ -55,14 +55,30 @@ class AppointmentForm(forms.ModelForm):
         fields = ['specialty', 'doctor', 'date', 'time'] 
     
     def __init__(self, *args, **kwargs):
+        # Extract specialty from kwargs before calling super()
+        specialty = kwargs.pop('specialty', None)
         super().__init__(*args, **kwargs)
         
-        # Always filter doctors based on specialty from form data
-        if self.data.get('specialty'):
-            specialty = self.data.get('specialty')
-            self.fields['doctor'].queryset = Doctor.objects.filter(specialty=specialty)
+        # Get specialty from either kwargs, GET data, or POST data
+        selected_specialty = specialty
+        
+        # For GET requests (specialty filter), check initial data
+        if not selected_specialty and hasattr(self, 'initial') and self.initial.get('specialty'):
+            selected_specialty = self.initial.get('specialty')
+        
+        # For POST requests, check form data
+        if not selected_specialty and hasattr(self, 'data') and self.data.get('specialty'):
+            selected_specialty = self.data.get('specialty')
+        
+        # Filter doctors based on specialty if provided
+        if selected_specialty:
+            self.fields['doctor'].queryset = Doctor.objects.filter(specialty=selected_specialty)
         else:
-            self.fields['doctor'].queryset = Doctor.objects.none()
+            # Show all doctors if no specialty selected, or none if you prefer
+            self.fields['doctor'].queryset = Doctor.objects.all()  # or Doctor.objects.none()
+        
+        # Set empty label for doctor dropdown
+        self.fields['doctor'].empty_label = "Select a doctor"
         
         # Add placeholders and improve UX
         self.fields['date'].widget = forms.DateInput(attrs={
@@ -70,7 +86,7 @@ class AppointmentForm(forms.ModelForm):
             'type': 'date'
         })
         self.fields['time'].widget = forms.TimeInput(attrs={
-            'class': 'form-control',
+            'class': 'form-control', 
             'type': 'time'
         })
         

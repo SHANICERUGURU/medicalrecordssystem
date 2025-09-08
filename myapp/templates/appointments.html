@@ -62,31 +62,14 @@
         </button>
       </div>
 
-      <!-- Appointment Form - THE FIX IS HERE -->
+      <!-- Combined Appointment Form -->
       <div id="appointmentForm" class="collapse {% if keep_form_open %}show{% endif %}">
         <div class="card">
           <div class="card-header bg-light">
             <h5 class="mb-0">Schedule New Appointment</h5>
           </div>
           <div class="card-body">
-            <!-- Specialty Filter Form -->
-            <form method="get" class="mb-3">
-              <div class="mb-3">
-                <label for="specialty" class="form-label">Filter by Specialty</label>
-                <select name="specialty" id="specialty" class="form-select" onchange="this.form.submit()">
-                  <option value="">All Specialties</option>
-                  {% for value, name in form.fields.specialty.choices %}
-                  <option value="{{ value }}" {% if request.GET.specialty == value %}selected{% endif %}>
-                    {{ name }}
-                  </option>
-                  {% endfor %}
-                </select>
-              </div>
-              <!-- Hidden input to keep form open -->
-              <input type="hidden" name="keep_open" value="true">
-            </form>
-
-            <!-- Appointment Booking Form -->
+            <!-- Single Combined Form -->
             <form method="post">
               {% csrf_token %}
 
@@ -106,25 +89,56 @@
               </div>
               {% endif %}
 
+              <!-- Specialty Filter -->
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.specialty.id_for_label }}" class="form-label">Specialty</label>
+                  <select name="specialty" id="specialty" class="form-select" onchange="this.form.submit()">
+                    <option value="">Select Specialty</option>
+                    {% for value, name in form.fields.specialty.choices %}
+                    <option value="{{ value }}" {% if form.specialty.value == value %}selected{% endif %}>
+                      {{ name }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                  {% if form.specialty.help_text %}
+                  <div class="form-text">{{ form.specialty.help_text }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Appointment Details -->
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="{{ form.date.id_for_label }}" class="form-label">Date</label>
                   {{ form.date }}
+                  {% if form.date.help_text %}
+                  <div class="form-text">{{ form.date.help_text }}</div>
+                  {% endif %}
                 </div>
 
                 <div class="col-md-6 mb-3">
                   <label for="{{ form.time.id_for_label }}" class="form-label">Time</label>
                   {{ form.time }}
+                  {% if form.time.help_text %}
+                  <div class="form-text">{{ form.time.help_text }}</div>
+                  {% endif %}
                 </div>
 
                 <div class="col-md-6 mb-3">
                   <label for="{{ form.doctor.id_for_label }}" class="form-label">Doctor</label>
                   {{ form.doctor }}
+                  {% if form.doctor.help_text %}
+                  <div class="form-text">{{ form.doctor.help_text }}</div>
+                  {% endif %}
                 </div>
 
                 <div class="col-md-6 mb-3">
                   <label for="{{ form.reason.id_for_label }}" class="form-label">Reason</label>
                   {{ form.reason }}
+                  {% if form.reason.help_text %}
+                  <div class="form-text">{{ form.reason.help_text }}</div>
+                  {% endif %}
                 </div>
               </div>
 
