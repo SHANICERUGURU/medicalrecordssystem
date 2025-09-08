@@ -24,29 +24,29 @@
         
         {% if user.is_authenticated %}
           <li class="nav-item">
-            <span class="nav-link disabled">
+            <span class="nav-link text-dark fw-bold disabled">
               Hello, {{ user.get_full_name|default:user.username|default:"User" }}
             </span>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'landing' %}">Home</a>
+            <a class="nav-link text-dark fw-bold" href="{% url 'landing' %}">Home</a>
           </li>
 
           {% if user.is_patient %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'dashboard' %}">My Profile</a>
+            <a class="nav-link text-dark fw-bold" href="{% url 'dashboard' %}">My Profile</a>
           </li>
           {% endif %}
           
           {% if user.is_patient %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'appointments' %}">Appointments</a>
+            <a class="nav-link text-dark fw-bold" href="{% url 'appointments' %}">Appointments</a>
           </li>
           {% endif %}
 
           {% if user.is_doctor %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'patient_list' %}">Manage Patients</a>
+            <a class="nav-link text-dark fw-bold" href="{% url 'patient_list' %}">Manage Patients</a>
           </li>
           {% endif %}
 
@@ -54,7 +54,7 @@
           <li class="nav-item">
             <form action="{% url 'logout' %}" method="post" class="d-inline">
               {% csrf_token %}
-              <button type="submit" class="nav-link btn btn-link" style="border: none; background: none; cursor: pointer; color: rgba(255,255,255,.55); padding: 0.5rem 1rem;">
+              <button type="submit" class="nav-link btn btn-link text-dark fw-bold" style="border: none; background: none; cursor: pointer; padding: 0.5rem 1rem;">
                 <i class="bi bi-box-arrow-right"></i> Logout
               </button>
             </form>
@@ -62,10 +62,10 @@
           
         {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}">Login</a>
+            <a class="nav-link text-dark fw-bold" href="{% url 'login' %}">Login</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'register' %}">Register</a>
+            <a class="nav-link text-dark fw-bold" href="{% url 'register' %}">Register</a>
           </li>
         {% endif %}
 
