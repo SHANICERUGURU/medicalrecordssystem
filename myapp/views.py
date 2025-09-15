@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+
 from .models import *
 from .forms import *
 from django.contrib import messages
@@ -488,4 +489,6 @@ def doctor_profile_edit(request, pk):
         form = DoctorForm(instance=profile)
 
     return render(request, 'doctorregistration.html', {'form': form, 'mode': 'edit'})
+
+
 
