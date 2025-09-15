@@ -18,6 +18,7 @@ from decouple import config
 import dj_database_url
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -35,6 +36,19 @@ DEBUG = os.getenv('DEBUG', 'True') =='True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
+REST_FRAMEWORK = { 
+    "DEFAULT_AUTHENTICATION_CLASSES": ( 
+        "rest_framework_simplejwt.authentication.JWTAuthentication", 
+    ), 
+    "DEFAULT_PERMISSION_CLASSES": [ 
+        "rest_framework.permissions.IsAuthenticated", 
+    ], 
+} 
+ 
+SIMPLE_JWT = { 
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30), 
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1), 
+}
 
 # Application definition
 
@@ -47,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp',
     'rest_framework',
+    'corsheaders',
 ]
 
 AUTH_USER_MODEL = 'myapp.User'
@@ -59,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
@@ -137,3 +153,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/landing/' 
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
